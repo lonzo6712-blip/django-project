@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="card stack" style="max-width: 760px; margin: 0 auto;">
+        <div>
+            <div class="label">MonetteFarms Driver QR Poster</div>
+            <h2 class="section-title" style="margin-top: 0.4rem;">{{ facility.name }}</h2>
+            <p class="hint">
+                {% if facility.street_address %}
+                    {{ facility.street_address }}, {{ facility.city }}, {{ facility.state }}
+                {% else %}
+                    {{ facility.city }}, {{ facility.state }}
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="grid" style="align-items: start;">
+            <div class="card" style="box-shadow: none;">
+                <div class="qr-frame">
+                    {{ driver_checkin_qr_svg }}
+                </div>
+            </div>
+            <div class="stack">
+                <div>
+                    <div class="label">MonetteFarms Driver URL</div>
+                    <div class="url-box">{{ driver_checkin_url }}</div>
+                </div>
+                <p class="hint">Drivers can open this link directly or scan the QR code to reach the MonetteFarms driver check-in form for this facility.</p>
+                <div class="actions" style="justify-content: flex-start;">
+                    <a class="btn" href="{{ driver_checkin_url }}">Open Driver Check-In</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

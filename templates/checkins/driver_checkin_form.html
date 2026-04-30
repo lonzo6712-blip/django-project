@@ -1,0 +1,365 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+    <style>
+        .public-checkin-page .topbar {
+            margin-bottom: 1rem;
+        }
+
+        .public-checkin-page .brand h1 {
+            font-size: clamp(1.5rem, 3vw, 2.3rem);
+        }
+
+        .clipboard-shell {
+            max-width: 980px;
+            margin: 0 auto;
+            padding-top: 0.5rem;
+        }
+
+        .clipboard {
+            position: relative;
+            padding: 4.75rem 2.5rem 2.75rem;
+            background: #fffef9;
+            border: 1px solid #d7cfbe;
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(31, 41, 51, 0.14);
+        }
+
+        .clipboard::before {
+            content: "";
+            position: absolute;
+            top: 0.75rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(420px, calc(100% - 5rem));
+            height: 2.5rem;
+            border-radius: 0 0 28px 28px;
+            background: linear-gradient(180deg, #8f969d 0%, #6f757d 100%);
+            box-shadow: inset 0 2px 3px rgba(255, 255, 255, 0.25);
+        }
+
+        .paper-head {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .produce-mark {
+            display: inline-grid;
+            gap: 0.5rem;
+            justify-items: center;
+        }
+
+        .produce-mark .arc {
+            width: 220px;
+            height: 18px;
+            border-top: 6px solid #d5aa3d;
+            border-radius: 999px;
+        }
+
+        .produce-mark .name {
+            font-size: clamp(2.4rem, 5vw, 4.3rem);
+            line-height: 0.92;
+            font-weight: 800;
+            letter-spacing: 0;
+            color: #1e1d1a;
+        }
+
+        .produce-mark .tagline {
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            font-style: italic;
+            color: #393733;
+        }
+
+        .paper-title {
+            margin: 1.35rem 0 0.35rem;
+            font-size: clamp(1.2rem, 2.3vw, 1.8rem);
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #202020;
+        }
+
+        .facility-line {
+            margin: 0;
+            color: #55514a;
+            font-size: 1rem;
+        }
+
+        .meta-grid,
+        .paper-grid {
+            display: grid;
+            gap: 1.25rem 1.5rem;
+        }
+
+        .meta-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            margin-bottom: 1.5rem;
+        }
+
+        .paper-grid.two-col {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .section-heading {
+            margin: 2rem 0 1rem;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #181818;
+            text-transform: none;
+        }
+
+        .line-field {
+            display: grid;
+            gap: 0.4rem;
+        }
+
+        .line-field.checkbox-field {
+            gap: 0.75rem;
+        }
+
+        .line-field > label,
+        .checkbox-field .checkbox-label {
+            margin: 0;
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: #1f1f1f;
+        }
+
+        .line-field input[type="text"],
+        .line-field input[type="tel"],
+        .line-field input[type="datetime-local"],
+        .line-field textarea {
+            padding: 0.35rem 0;
+            border: 0;
+            border-bottom: 2px solid #2f2f2f;
+            border-radius: 0;
+            background: transparent;
+            font-size: 1rem;
+            color: #171717;
+        }
+
+        .line-field textarea {
+            min-height: 5.75rem;
+            resize: vertical;
+        }
+
+        .line-field input:focus,
+        .line-field textarea:focus {
+            outline: none;
+            border-bottom-color: #bf6c2c;
+            box-shadow: none;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding-bottom: 0.35rem;
+            border-bottom: 2px solid #2f2f2f;
+        }
+
+        .checkbox-row input[type="checkbox"] {
+            width: 1.15rem;
+            height: 1.15rem;
+            margin: 0;
+        }
+
+        .paper-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.9rem;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        .paper-actions .hint {
+            max-width: 420px;
+        }
+
+        .form-errors {
+            display: grid;
+            gap: 0.55rem;
+            margin-bottom: 1rem;
+        }
+
+        .field-errorlist,
+        .field-errorlist li,
+        .form-errors,
+        .form-errors li {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            color: #9d2f2f;
+            font-size: 0.92rem;
+        }
+
+        .footer-note {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2d8c8;
+            font-size: 0.95rem;
+            color: #5d5851;
+        }
+
+        @media (max-width: 760px) {
+            .clipboard {
+                padding: 4.2rem 1.2rem 1.75rem;
+            }
+
+            .clipboard::before {
+                width: calc(100% - 2.5rem);
+            }
+
+            .meta-grid,
+            .paper-grid.two-col {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <section class="clipboard-shell public-checkin-page">
+        <article class="clipboard">
+            <div class="paper-head">
+                <div class="produce-mark">
+                    <div class="arc" aria-hidden="true"></div>
+                    <div class="name">MONETTE<br>PRODUCE</div>
+                    <div class="tagline">Together we create more</div>
+                </div>
+                <h2 class="paper-title">Warehouse Driver Check-In Form</h2>
+                <p class="facility-line">
+                    {{ facility.name }}
+                    {% if facility.street_address %}
+                        | {{ facility.street_address }}, {{ facility.city }}, {{ facility.state }}
+                    {% else %}
+                        | {{ facility.city }}, {{ facility.state }}
+                    {% endif %}
+                </p>
+                <p class="facility-line">MonetteFarms Driver Check-In</p>
+            </div>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <ul class="form-errors">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <div class="meta-grid">
+                    <div class="line-field">
+                        <label for="{{ form.appointment_time.id_for_label }}">Date / Time In</label>
+                        {{ form.appointment_time }}
+                        {{ form.appointment_time.errors }}
+                    </div>
+                    <div class="line-field">
+                        <label>Facility</label>
+                        <input type="text" value="{{ facility.name }}" readonly>
+                    </div>
+                </div>
+
+                <h3 class="section-heading">Driver Information</h3>
+                <div class="paper-grid two-col">
+                    <div class="line-field">
+                        <label for="{{ form.driver_name.id_for_label }}">{{ form.driver_name.label }}</label>
+                        {{ form.driver_name }}
+                        {{ form.driver_name.errors }}
+                    </div>
+                    <div class="line-field">
+                        <label for="{{ form.phone_number.id_for_label }}">{{ form.phone_number.label }}</label>
+                        {{ form.phone_number }}
+                        {{ form.phone_number.errors }}
+                    </div>
+                </div>
+
+                <h3 class="section-heading">Truck Information</h3>
+                <div class="paper-grid two-col">
+                    <div class="line-field">
+                        <label for="{{ form.carrier_name.id_for_label }}">{{ form.carrier_name.label }}</label>
+                        {{ form.carrier_name }}
+                        {{ form.carrier_name.errors }}
+                    </div>
+                    <div class="line-field">
+                        <label for="{{ form.truck_number.id_for_label }}">{{ form.truck_number.label }}</label>
+                        {{ form.truck_number }}
+                        {{ form.truck_number.errors }}
+                    </div>
+                    <div class="line-field">
+                        <label for="{{ form.trailer_number.id_for_label }}">{{ form.trailer_number.label }}</label>
+                        {{ form.trailer_number }}
+                        {{ form.trailer_number.errors }}
+                    </div>
+                    <div class="line-field">
+                        <label for="{{ form.trailer_license_plate.id_for_label }}">{{ form.trailer_license_plate.label }}</label>
+                        {{ form.trailer_license_plate }}
+                        {{ form.trailer_license_plate.errors }}
+                    </div>
+                    <div class="line-field checkbox-field">
+                        <div class="checkbox-label">{{ form.temperature_controlled.label }}</div>
+                        <div class="checkbox-row">
+                            {{ form.temperature_controlled }}
+                            <span>Mark this if the load requires temperature control.</span>
+                        </div>
+                        {{ form.temperature_controlled.errors }}
+                    </div>
+                </div>
+
+                <h3 class="section-heading">Load Information</h3>
+                <div class="paper-grid">
+                    <div class="line-field">
+                        <label for="{{ form.weight_in_out.id_for_label }}">{{ form.weight_in_out.label }}</label>
+                        {{ form.weight_in_out }}
+                        {{ form.weight_in_out.errors }}
+                    </div>
+                    <div class="line-field">
+                        <label for="{{ form.load_reference.id_for_label }}">{{ form.load_reference.label }}</label>
+                        {{ form.load_reference }}
+                        {{ form.load_reference.errors }}
+                    </div>
+                    <div class="line-field">
+                        <label for="{{ form.bol_number.id_for_label }}">{{ form.bol_number.label }}</label>
+                        {{ form.bol_number }}
+                        {{ form.bol_number.errors }}
+                    </div>
+                    <div class="paper-grid two-col">
+                        <div class="line-field">
+                            <label for="{{ form.temperature_setpoint.id_for_label }}">{{ form.temperature_setpoint.label }}</label>
+                            {{ form.temperature_setpoint }}
+                            {{ form.temperature_setpoint.errors }}
+                        </div>
+                        <div class="line-field">
+                            <label for="{{ form.actual_temperature.id_for_label }}">{{ form.actual_temperature.label }}</label>
+                            {{ form.actual_temperature }}
+                            {{ form.actual_temperature.errors }}
+                        </div>
+                    </div>
+                    <div class="line-field">
+                        <label for="{{ form.destination_delivery_address.id_for_label }}">{{ form.destination_delivery_address.label }}</label>
+                        {{ form.destination_delivery_address }}
+                        {{ form.destination_delivery_address.errors }}
+                    </div>
+                    <div class="line-field">
+                        <label for="{{ form.driver_signature.id_for_label }}">{{ form.driver_signature.label }}</label>
+                        {{ form.driver_signature }}
+                        {{ form.driver_signature.errors }}
+                    </div>
+                    <div class="line-field">
+                        <label for="{{ form.safety_notes.id_for_label }}">{{ form.safety_notes.label }}</label>
+                        {{ form.safety_notes }}
+                        {{ form.safety_notes.errors }}
+                    </div>
+                </div>
+
+                <div class="paper-actions">
+                    <button class="btn" type="submit">Submit Driver Check-In</button>
+                    <p class="hint">Complete this form when you arrive. Warehouse staff will review it and route your load.</p>
+                </div>
+
+                <p class="footer-note">Warehouse staff will assign the dock and complete the remaining internal fields after submission.</p>
+            </form>
+        </article>
+    </section>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="card">
+        <div class="topbar">
+            <div>
+                <div class="label">MonetteFarms Check-In Entry</div>
+                <h2 style="margin: 0.25rem 0 0;">{{ checkin.load_reference }}</h2>
+            </div>
+            <div class="actions">
+                <a class="btn btn-secondary" href="{% url 'dashboard' %}">Back to Dashboard</a>
+                <span class="status">{{ checkin.get_status_display }}</span>
+            </div>
+        </div>
+
+        <div class="detail-list">
+            <div>
+                <div class="label">Driver</div>
+                <div class="value">{{ checkin.driver_name }}</div>
+            </div>
+            <div>
+                <div class="label">Phone</div>
+                <div class="value">{{ checkin.phone_number|default:"Not provided" }}</div>
+            </div>
+            <div>
+                <div class="label">Carrier</div>
+                <div class="value">{{ checkin.carrier.name }}</div>
+            </div>
+            <div>
+                <div class="label">Facility</div>
+                <div class="value">
+                    {{ checkin.facility.name }}
+                    {% if checkin.facility.street_address %}
+                        <div class="hint">{{ checkin.facility.street_address }}, {{ checkin.facility.city }}, {{ checkin.facility.state }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div>
+                <div class="label">Truck / Trailer</div>
+                <div class="value">{{ checkin.truck_number }} / {{ checkin.trailer_number|default:"N/A" }}</div>
+            </div>
+            <div>
+                <div class="label">Trailer Plate</div>
+                <div class="value">{{ checkin.trailer_license_plate|default:"Not provided" }}</div>
+            </div>
+            <div>
+                <div class="label">Appointment</div>
+                <div class="value">{{ checkin.appointment_time|date:"M j, Y g:i A" }}</div>
+            </div>
+            <div>
+                <div class="label">Assigned Dock</div>
+                <div class="value">{{ checkin.dock_number|default:"Pending" }}</div>
+            </div>
+            <div>
+                <div class="label">Warehouse Staff Initials</div>
+                <div class="value">{{ checkin.warehouse_staff_initials|default:"Not provided" }}</div>
+            </div>
+            <div>
+                <div class="label">PO / Reference</div>
+                <div class="value">{{ checkin.load_reference }}</div>
+            </div>
+            <div>
+                <div class="label">BOL Number</div>
+                <div class="value">{{ checkin.bol_number|default:"Not provided" }}</div>
+            </div>
+            <div>
+                <div class="label">Weight-In / Weight-Out</div>
+                <div class="value">{{ checkin.weight_in_out|default:"Not provided" }}</div>
+            </div>
+            <div>
+                <div class="label">Temperature</div>
+                <div class="value">
+                    Setpoint: {{ checkin.temperature_setpoint|default:"N/A" }}
+                    <div class="hint">Actual: {{ checkin.actual_temperature|default:"N/A" }}</div>
+                </div>
+            </div>
+            <div>
+                <div class="label">Driver Signature</div>
+                <div class="value">{{ checkin.driver_signature|default:"Not provided" }}</div>
+            </div>
+        </div>
+
+        {% if checkin.cargo_description or checkin.destination_delivery_address or checkin.safety_notes %}
+            <h3 class="section-title">Operational Notes</h3>
+            {% if checkin.cargo_description %}
+                <p><strong>Cargo:</strong> {{ checkin.cargo_description }}</p>
+            {% endif %}
+            {% if checkin.destination_delivery_address %}
+                <p><strong>Destination / Delivery Address:</strong> {{ checkin.destination_delivery_address }}</p>
+            {% endif %}
+            {% if checkin.safety_notes %}
+                <p><strong>Safety Notes:</strong> {{ checkin.safety_notes }}</p>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <h3 class="section-title">Dispatch Actions</h3>
+        <form method="post" action="{% url 'checkin_update' checkin.pk %}">
+            {% csrf_token %}
+            {{ dispatch_form.non_field_errors }}
+            {% for field in dispatch_form %}
+                <div>
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+            <div class="actions" style="justify-content: flex-start;">
+                <button class="btn" type="submit">Save Dispatch Update</button>
+                {% if checkin.status != checkin.Status.COMPLETED %}
+                    <button class="btn btn-secondary" type="submit" name="action" value="complete">
+                        Complete Checkout
+                    </button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <div class="card">
+        <h3 class="section-title">Text The Driver</h3>
+        {% if checkin.phone_number %}
+            <form method="post" action="{% url 'checkin_send_sms' checkin.pk %}">
+                {% csrf_token %}
+                {{ sms_form.non_field_errors }}
+                {% for field in sms_form %}
+                    <div>
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+                <button class="btn" type="submit">Send Text</button>
+            </form>
+        {% else %}
+            <p class="hint">Add the driver phone number to enable SMS updates.</p>
+        {% endif %}
+
+        <h3 class="section-title">Recent Driver Texts</h3>
+        {% if sms_history %}
+            <table>
+                <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Message</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for sms in sms_history %}
+                    <tr>
+                        <td>{{ sms.created_at|date:"M j, Y g:i A" }}</td>
+                        <td><span class="status">{{ sms.get_delivery_status_display }}</span></td>
+                        <td>{{ sms.body }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="hint">No driver texts have been sent for this load yet.</p>
+        {% endif %}
+    </div>
+{% endblock %}

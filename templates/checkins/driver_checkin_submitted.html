@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="card stack" style="max-width: 680px; margin: 0 auto;">
+        <div class="label">MonetteFarms Check-In Submitted</div>
+        <h2 class="section-title" style="margin-top: 0.4rem;">{{ checkin.load_reference }}</h2>
+        <p class="hint">Your information was sent to MonetteFarms receiving. Keep your phone available for updates.</p>
+
+        <div class="detail-list">
+            <div>
+                <div class="label">Facility</div>
+                <div class="value">{{ checkin.facility.name }}</div>
+            </div>
+            <div>
+                <div class="label">Appointment</div>
+                <div class="value">{{ checkin.appointment_time|date:"M j, Y g:i A" }}</div>
+            </div>
+            <div>
+                <div class="label">Status</div>
+                <div class="value">{{ checkin.get_status_display }}</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

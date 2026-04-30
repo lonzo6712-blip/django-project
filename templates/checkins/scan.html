@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="card scanner">
+        <div>
+            <h2 class="section-title">Scan Driver QR Code</h2>
+            <p class="hint">Point the device camera at a QR code that contains a load reference. If that load already exists, this will open it. Otherwise it will prefill a new check-in.</p>
+        </div>
+
+        <video id="qr-video" playsinline muted></video>
+        <div id="scan-result" class="scan-result" hidden></div>
+
+        <div class="actions" style="justify-content: flex-start;">
+            <button class="btn" id="start-scan" type="button">Start Camera</button>
+            <button class="btn btn-secondary" id="stop-scan" type="button">Stop Camera</button>
+        </div>
+
+        <form method="get" action="{% url 'qr_lookup' %}">
+            <div>
+                <label for="manual-code">Manual code entry</label>
+                <input id="manual-code" name="code" type="text" placeholder="Scan result or load reference">
+            </div>
+            <button class="btn" type="submit">Open Check-In</button>
+        </form>
+    </div>
+
+    <script>
+        (() => {
+            const video = document.getElementById("qr-video");
+            const startButton = document.getElementById("start-scan");
+            const stopButton = document.getElementById("stop-scan");
+            const resultBox = document.getElementById("scan-result");
+            const lookupUrl = "{% url 'qr_lookup' %}";
+
+            let stream = null;
+            let detector = null;
+            let rafId = null;
+
+            function showResult(message) {
+                resultBox.hidden = false;
+                resultBox.textContent = message;
+            }
+
+            function stopStream() {
+                if (rafId) {
+                    cancelAnimationFrame(rafId);
+                    rafId = null;
+                }
+                if (stream) {
+                    stream.getTracks().forEach((track) => track.stop());
+                    stream = null;
+                }
+                video.srcObject = null;
+            }
+
+            function submitCode(code) {
+                if (!code) {
+                    return;
+                }
+                showResult(`QR read: ${code}`);
+                stopStream();
+                window.location.href = `${lookupUrl}?code=${encodeURIComponent(code)}`;
+            }
+
+            async function scanFrame() {
+                if (!stream) {
+                    return;
+                }
+
+                try {
+                    const barcodes = await detector.detect(video);
+                    if (barcodes.length > 0 && barcodes[0].rawValue) {
+                        submitCode(barcodes[0].rawValue);
+                        return;
+                    }
+                } catch (error) {
+                    showResult("Scanning failed on this frame. You can try again or use manual entry.");
+                }
+
+                rafId = requestAnimationFrame(scanFrame);
+            }
+
+            async function startScan() {
+                if (!("BarcodeDetector" in window)) {
+                    showResult("This browser does not support live QR scanning. Use manual entry or open the page in Chrome on mobile.");
+                    return;
+                }
+
+                try {
+                    detector = new BarcodeDetector({formats: ["qr_code"]});
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: {facingMode: {ideal: "environment"}}
+                    });
+                    video.srcObject = stream;
+                    await video.play();
+                    showResult("Camera started. Hold the QR code inside the frame.");
+                    rafId = requestAnimationFrame(scanFrame);
+                } catch (error) {
+                    showResult("Camera access was blocked or unavailable. Use manual entry if needed.");
+                }
+            }
+
+            startButton.addEventListener("click", startScan);
+            stopButton.addEventListener("click", () => {
+                stopStream();
+                showResult("Camera stopped.");
+            });
+
+            window.addEventListener("beforeunload", stopStream);
+        })();
+    </script>
+{% endblock %}

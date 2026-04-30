@@ -1,0 +1,16 @@
+[Unit]
+Description=MonetteFarms Outbound SMS Worker
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/srv/monettefarms/app
+EnvironmentFile=/srv/monettefarms/.env
+ExecStart=/srv/monettefarms/app/.venv/bin/python manage.py process_outbound_sms --loop --limit 20 --sleep-seconds 5
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

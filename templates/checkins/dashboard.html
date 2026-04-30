@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <section class="grid">
+        <article class="card">
+            <div class="label">Active Trucks</div>
+            <p class="metric">{{ active_count }}</p>
+        </article>
+        <article class="card">
+            <div class="label">Completed Loads</div>
+            <p class="metric">{{ completed_today }}</p>
+        </article>
+        <article class="card">
+            <div class="label">Waiting</div>
+            <p class="metric">{{ status_counts.waiting|default:0 }}</p>
+        </article>
+        <article class="card">
+            <div class="label">On Dock</div>
+            <p class="metric">{{ status_counts.on_dock|default:0 }}</p>
+        </article>
+    </section>
+
+    <h2 class="section-title">MonetteFarms Driver Check-In</h2>
+    <section class="grid">
+        {% for facility in active_facilities %}
+            <article class="card stack">
+                <div>
+                    <div class="label">Facility</div>
+                    <div class="value">{{ facility.name }}</div>
+                    {% if facility.street_address %}
+                        <p class="hint">{{ facility.street_address }}, {{ facility.city }}, {{ facility.state }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <div class="label">Public Driver Check-In URL</div>
+                    <div class="url-box">{{ request.scheme }}://{{ request.get_host }}{% url 'driver_checkin' facility.pk %}</div>
+                </div>
+                <div class="actions" style="justify-content: flex-start;">
+                    <a class="btn" href="{% url 'facility_driver_qr' facility.pk %}">Open Driver QR Poster</a>
+                </div>
+            </article>
+        {% empty %}
+            <article class="card">
+                <p class="hint">No active facilities are available for MonetteFarms driver check-in.</p>
+            </article>
+        {% endfor %}
+    </section>
+
+    <h2 class="section-title">Waiting Trucks</h2>
+    <div class="card">
+        <table>
+            <thead>
+            <tr>
+                <th>Driver</th>
+                <th>Load</th>
+                <th>Facility</th>
+                <th>Status</th>
+                <th>Appointment</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for checkin in waiting_checkins %}
+                <tr>
+                    <td><a href="{% url 'checkin_detail' checkin.pk %}">{{ checkin.driver_name }}</a></td>
+                    <td>{{ checkin.load_reference }}</td>
+                    <td>
+                        {{ checkin.facility.name }}
+                        {% if checkin.facility.street_address %}
+                            <div class="hint">{{ checkin.facility.street_address }}, {{ checkin.facility.city }}, {{ checkin.facility.state }}</div>
+                        {% endif %}
+                    </td>
+                    <td><span class="status">{{ checkin.get_status_display }}</span></td>
+                    <td>{{ checkin.appointment_time|date:"M j, Y g:i A" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No waiting trucks right now.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="section-title">On Dock / Unloading</h2>
+    <div class="card">
+        <table>
+            <thead>
+            <tr>
+                <th>Driver</th>
+                <th>Load</th>
+                <th>Facility</th>
+                <th>Status</th>
+                <th>Appointment</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for checkin in in_progress_checkins %}
+                <tr>
+                    <td><a href="{% url 'checkin_detail' checkin.pk %}">{{ checkin.driver_name }}</a></td>
+                    <td>{{ checkin.load_reference }}</td>
+                    <td>
+                        {{ checkin.facility.name }}
+                        {% if checkin.facility.street_address %}
+                            <div class="hint">{{ checkin.facility.street_address }}, {{ checkin.facility.city }}, {{ checkin.facility.state }}</div>
+                        {% endif %}
+                    </td>
+                    <td><span class="status">{{ checkin.get_status_display }}</span></td>
+                    <td>{{ checkin.appointment_time|date:"M j, Y g:i A" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No trucks are currently on dock or unloading.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="section-title">Completed Trucks</h2>
+    <div class="card">
+        <table>
+            <thead>
+            <tr>
+                <th>Driver</th>
+                <th>Load</th>
+                <th>Facility</th>
+                <th>Status</th>
+                <th>Appointment</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for checkin in completed_checkins %}
+                <tr>
+                    <td><a href="{% url 'checkin_detail' checkin.pk %}">{{ checkin.driver_name }}</a></td>
+                    <td>{{ checkin.load_reference }}</td>
+                    <td>
+                        {{ checkin.facility.name }}
+                        {% if checkin.facility.street_address %}
+                            <div class="hint">{{ checkin.facility.street_address }}, {{ checkin.facility.city }}, {{ checkin.facility.state }}</div>
+                        {% endif %}
+                    </td>
+                    <td><span class="status">{{ checkin.get_status_display }}</span></td>
+                    <td>{{ checkin.appointment_time|date:"M j, Y g:i A" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No completed trucks yet.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

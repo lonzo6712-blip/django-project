@@ -1,0 +1,16 @@
+[Unit]
+Description=MonetteFarms Django Web
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/srv/monettefarms/app
+EnvironmentFile=/srv/monettefarms/.env
+ExecStart=/srv/monettefarms/app/.venv/bin/python run_asgi.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
