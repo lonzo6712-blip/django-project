@@ -52,6 +52,37 @@ UVICORN_FORWARDED_ALLOW_IPS=127.0.0.1
 .\.venv\Scripts\python.exe manage.py createsuperuser
 ```
 
+## Render deployment
+
+Use these settings for the current Render deployment at `django-project-1-g31l.onrender.com`.
+
+- Build command:
+
+```bash
+pip install -r requirements.txt && python manage.py collectstatic --noinput
+```
+
+- Start command:
+
+```bash
+python run_asgi.py
+```
+
+- Required Render environment variables:
+  - `DJANGO_ENV=production`
+  - `DJANGO_DEBUG=false`
+  - `DJANGO_SECRET_KEY=<real secret>`
+  - `DJANGO_ALLOWED_HOSTS=django-project-1-g31l.onrender.com`
+  - `DJANGO_CSRF_TRUSTED_ORIGINS=https://django-project-1-g31l.onrender.com`
+  - `DATABASE_URL=<Render Postgres internal or external URL>`
+  - `CACHE_URL=<Render Redis internal or external URL>`
+
+Notes:
+
+- Do not use the placeholder values from `.env.production` for `DJANGO_SECRET_KEY`, `DATABASE_URL`, or Twilio credentials.
+- Do not use `redis://127.0.0.1:6379/1` on Render unless Redis is actually running in the same container, which is not the normal Render setup.
+- Run `python manage.py migrate` after provisioning the database and before serving live traffic.
+
 ## Recommended runtime layout
 
 - Run Uvicorn behind a reverse proxy such as Nginx or Caddy.

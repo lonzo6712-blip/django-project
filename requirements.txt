@@ -10,3 +10,4 @@ redis>=6,<7
 sqlparse==0.5.5
 tzdata==2026.2
 uvicorn==0.46.0
+whitenoise==6.12.0
