@@ -33,10 +33,10 @@
                 </div>
                 <div>
                     <div class="label">Public Driver Check-In URL</div>
-                    <div class="url-box">{{ request.scheme }}://{{ request.get_host }}{% url 'driver_checkin' facility.pk %}</div>
+                    <div class="url-box">{{ request.scheme }}://{{ request.get_host }}{% url 'driver_checkin' facility.slug %}</div>
                 </div>
                 <div class="actions" style="justify-content: flex-start;">
-                    <a class="btn" href="{% url 'facility_driver_qr' facility.pk %}">Open Driver QR Poster</a>
+                    <a class="btn" href="{% url 'facility_driver_qr' facility.slug %}">Open Driver QR Poster</a>
                 </div>
             </article>
         {% empty %}

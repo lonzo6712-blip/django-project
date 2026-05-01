@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.utils.text import slugify
 from django.utils import timezone
 
 
@@ -17,6 +18,7 @@ class Carrier(models.Model):
 
 class Facility(models.Model):
     name = models.CharField(max_length=120)
+    slug = models.SlugField(max_length=140, unique=True, blank=True)
     street_address = models.CharField(max_length=200, blank=True)
     city = models.CharField(max_length=80)
     state = models.CharField(max_length=2)
@@ -29,6 +31,17 @@ class Facility(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name} ({self.city}, {self.state})"
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name) or "facility"
+            slug = base_slug
+            index = 2
+            while Facility.objects.exclude(pk=self.pk).filter(slug=slug).exists():
+                slug = f"{base_slug}-{index}"
+                index += 1
+            self.slug = slug
+        super().save(*args, **kwargs)
 
 
 class CheckIn(models.Model):

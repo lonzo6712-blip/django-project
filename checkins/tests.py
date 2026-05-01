@@ -208,15 +208,25 @@ class DashboardTests(TestCase):
         self.assertIn("facility", form.errors)
 
     def test_public_driver_checkin_page_is_accessible_without_login(self):
-        response = self.client.get(reverse("driver_checkin", args=[self.facility.pk]))
+        response = self.client.get(reverse("driver_checkin", args=[self.facility.slug]))
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "MonetteFarms Driver Check-In")
         self.assertContains(response, self.facility.street_address)
 
+    def test_legacy_numeric_driver_url_redirects_to_slug_url(self):
+        response = self.client.get(reverse("legacy_driver_checkin", args=[self.facility.pk]))
+
+        self.assertRedirects(
+            response,
+            reverse("driver_checkin", args=[self.facility.slug]),
+            status_code=301,
+            target_status_code=200,
+        )
+
     def test_public_driver_checkin_submission_creates_checkin(self):
         response = self.client.post(
-            reverse("driver_checkin", args=[self.facility.pk]),
+            reverse("driver_checkin", args=[self.facility.slug]),
             {
                 "driver_name": "Sam Ortiz",
                 "phone_number": "+15551234567",
@@ -253,7 +263,7 @@ class DashboardTests(TestCase):
 
     def test_public_driver_checkin_applies_rate_limit(self):
         first_response = self.client.post(
-            reverse("driver_checkin", args=[self.facility.pk]),
+            reverse("driver_checkin", args=[self.facility.slug]),
             {
                 "driver_name": "Sam Ortiz",
                 "phone_number": "+15551234567",
@@ -268,7 +278,7 @@ class DashboardTests(TestCase):
             follow=True,
         )
         second_response = self.client.post(
-            reverse("driver_checkin", args=[self.facility.pk]),
+            reverse("driver_checkin", args=[self.facility.slug]),
             {
                 "driver_name": "Sam Ortiz",
                 "phone_number": "+15551234567",
@@ -289,26 +299,38 @@ class DashboardTests(TestCase):
         self.assertFalse(CheckIn.objects.filter(load_reference="LOAD-9011").exists())
 
     def test_facility_driver_qr_requires_authentication(self):
-        response = self.client.get(reverse("facility_driver_qr", args=[self.facility.pk]))
+        response = self.client.get(reverse("facility_driver_qr", args=[self.facility.slug]))
 
         self.assertRedirects(
             response,
-            f"{reverse('login')}?next={reverse('facility_driver_qr', args=[self.facility.pk])}",
+            f"{reverse('login')}?next={reverse('facility_driver_qr', args=[self.facility.slug])}",
         )
 
     def test_facility_driver_qr_renders_svg_for_staff(self):
         self.login()
 
-        response = self.client.get(reverse("facility_driver_qr", args=[self.facility.pk]))
+        response = self.client.get(reverse("facility_driver_qr", args=[self.facility.slug]))
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "<svg", html=False)
-        self.assertContains(response, reverse("driver_checkin", args=[self.facility.pk]))
+        self.assertContains(response, reverse("driver_checkin", args=[self.facility.slug]))
+
+    def test_legacy_numeric_qr_url_redirects_to_slug_url(self):
+        self.login()
+
+        response = self.client.get(reverse("legacy_facility_driver_qr", args=[self.facility.pk]))
+
+        self.assertRedirects(
+            response,
+            reverse("facility_driver_qr", args=[self.facility.slug]),
+            status_code=301,
+            target_status_code=200,
+        )
 
     def test_facility_driver_qr_rejects_nonstaff_user(self):
         self.login_nonstaff()
 
-        response = self.client.get(reverse("facility_driver_qr", args=[self.facility.pk]))
+        response = self.client.get(reverse("facility_driver_qr", args=[self.facility.slug]))
 
         self.assertEqual(response.status_code, 403)
 

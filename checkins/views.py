@@ -116,8 +116,8 @@ def checkin_create(request):
     return render(request, "checkins/checkin_form.html", {"form": form})
 
 
-def driver_checkin(request, facility_pk: int):
-    facility = get_object_or_404(Facility, pk=facility_pk, is_active=True)
+def driver_checkin(request, facility_slug: str):
+    facility = get_object_or_404(Facility, slug=facility_slug, is_active=True)
 
     if request.method == "POST":
         rate_limit_key = _driver_rate_limit_key(request, facility.pk)
@@ -143,11 +143,11 @@ def driver_checkin_submitted(request, pk: int):
 
 
 @login_required
-def facility_driver_qr(request, facility_pk: int):
+def facility_driver_qr(request, facility_slug: str):
     _ensure_staff(request)
 
-    facility = get_object_or_404(Facility, pk=facility_pk, is_active=True)
-    driver_checkin_url = request.build_absolute_uri(reverse("driver_checkin", args=[facility.pk]))
+    facility = get_object_or_404(Facility, slug=facility_slug, is_active=True)
+    driver_checkin_url = request.build_absolute_uri(reverse("driver_checkin", args=[facility.slug]))
 
     qr = qrcode.QRCode(border=1)
     qr.add_data(driver_checkin_url)
@@ -163,6 +163,19 @@ def facility_driver_qr(request, facility_pk: int):
         "driver_checkin_qr_svg": mark_safe(qr_svg),
     }
     return render(request, "checkins/facility_driver_qr.html", context)
+
+
+def legacy_driver_checkin(request, facility_pk: int):
+    facility = get_object_or_404(Facility, pk=facility_pk, is_active=True)
+    return redirect("driver_checkin", facility_slug=facility.slug, permanent=True)
+
+
+@login_required
+def legacy_facility_driver_qr(request, facility_pk: int):
+    _ensure_staff(request)
+
+    facility = get_object_or_404(Facility, pk=facility_pk, is_active=True)
+    return redirect("facility_driver_qr", facility_slug=facility.slug, permanent=True)
 
 
 @login_required

@@ -11,9 +11,9 @@ class CarrierAdmin(admin.ModelAdmin):
 
 @admin.register(Facility)
 class FacilityAdmin(admin.ModelAdmin):
-    list_display = ("name", "street_address", "city", "state", "dock_count", "is_active")
+    list_display = ("name", "slug", "street_address", "city", "state", "dock_count", "is_active")
     list_filter = ("state", "is_active")
-    search_fields = ("name", "street_address", "city", "state")
+    search_fields = ("name", "slug", "street_address", "city", "state")
 
 
 @admin.register(CheckIn)
