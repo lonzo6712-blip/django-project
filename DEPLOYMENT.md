@@ -59,13 +59,19 @@ Use these settings for the current Render deployment at `django-project-1-g31l.o
 - Build command:
 
 ```bash
-pip install -r requirements.txt && python manage.py collectstatic --noinput
+pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput
 ```
 
 - Start command:
 
 ```bash
 python run_asgi.py
+```
+
+- Recommended Render pre-deploy command:
+
+```bash
+python manage.py migrate
 ```
 
 - Required Render environment variables:
@@ -82,6 +88,7 @@ Notes:
 - Do not use the placeholder values from `.env.production` for `DJANGO_SECRET_KEY`, `DATABASE_URL`, or Twilio credentials.
 - Do not use `redis://127.0.0.1:6379/1` on Render unless Redis is actually running in the same container, which is not the normal Render setup.
 - Run `python manage.py migrate` after provisioning the database and before serving live traffic.
+- If the Render deploy serves new code before migrations are applied, driver-facing routes and any new schema-backed features can fail immediately with database errors.
 
 ## Recommended runtime layout
 
