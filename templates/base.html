@@ -306,6 +306,9 @@
         </div>
         <div class="actions">
             {% if request.user.is_authenticated %}
+                {% if request.user.is_staff %}
+                    <a class="btn btn-secondary" href="{% url 'admin:index' %}">Admin Home</a>
+                {% endif %}
                 <a class="btn btn-secondary" href="{% url 'qr_scan' %}">Scan QR</a>
                 <a class="btn" href="{% url 'checkin_create' %}">New Check-In Entry</a>
                 <form method="post" action="{% url 'logout' %}" style="display: inline;">
