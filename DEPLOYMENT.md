@@ -56,6 +56,16 @@ UVICORN_FORWARDED_ALLOW_IPS=127.0.0.1
 
 Use these settings for the current Render deployment at `django-project-1-g31l.onrender.com`.
 
+This repo now includes a root-level `render.yaml` Blueprint with:
+- `autoDeployTrigger: commit`
+- `preDeployCommand: python manage.py migrate`
+- `healthCheckPath: /healthz/`
+
+Important:
+- A `render.yaml` file only controls services that are actually managed by a Render Blueprint.
+- If your current web service was created manually in the Render dashboard, adding `render.yaml` to the repo does not automatically change that existing service.
+- To have Render apply the Blueprint settings, you need to create or sync a Blueprint in Render and map it to the intended service.
+
 - Build command:
 
 ```bash

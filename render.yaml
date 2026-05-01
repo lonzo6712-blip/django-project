@@ -1,0 +1,47 @@
+services:
+  - name: django-project-1
+    type: web
+    runtime: python
+    branch: master
+    autoDeployTrigger: commit
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    preDeployCommand: python manage.py migrate
+    startCommand: python run_asgi.py
+    healthCheckPath: /healthz/
+    envVars:
+      - key: DJANGO_ENV
+        value: production
+      - key: DJANGO_DEBUG
+        value: "false"
+      - key: DJANGO_SECRET_KEY
+        sync: false
+      - key: DJANGO_ALLOWED_HOSTS
+        value: django-project-1-g31l.onrender.com
+      - key: DJANGO_CSRF_TRUSTED_ORIGINS
+        value: https://django-project-1-g31l.onrender.com
+      - key: DATABASE_URL
+        sync: false
+      - key: CACHE_URL
+        sync: false
+      - key: DJANGO_LOG_LEVEL
+        value: INFO
+      - key: SMS_BACKEND
+        value: checkins.sms.TwilioSMSBackend
+      - key: SMS_FROM_NUMBER
+        sync: false
+      - key: SMS_TWILIO_ACCOUNT_SID
+        sync: false
+      - key: SMS_TWILIO_AUTH_TOKEN
+        sync: false
+      - key: SMS_RATE_LIMIT_SECONDS
+        value: "30"
+      - key: DRIVER_CHECKIN_RATE_LIMIT_SECONDS
+        value: "60"
+      - key: SMS_MAX_ATTEMPTS
+        value: "5"
+      - key: SMS_RETRY_BASE_SECONDS
+        value: "30"
+      - key: SMS_WORKER_POLL_SECONDS
+        value: "5"
+      - key: SMS_WORKER_HEARTBEAT_TTL
+        value: "60"
